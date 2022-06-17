@@ -5,7 +5,7 @@ const db: IDB = {
   users: []
 };
 
-export class ORM<T extends IDB[TableName][number]> {
+export class Controller<T extends IDB[TableName][number]> {
   tableName: TableName;
 
   constructor(tableName: TableName) {
