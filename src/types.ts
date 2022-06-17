@@ -1,3 +1,6 @@
+export type ArrayElement<T extends readonly unknown[]> = T extends readonly (infer E)[] ? E : never;
+export type ValueOf<T extends object> = T[keyof T]; 
+
 export interface IDB {
   users: Array<UserDTO>
 }
