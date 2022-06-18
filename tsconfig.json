@@ -4,6 +4,8 @@
     "noImplicitAny": true,
     "target": "ES6",
     "allowJs": true,
-    "moduleResolution": "Node16"
+    "moduleResolution": "Node",
+    "module": "CommonJS",
+    "skipLibCheck": true
   }
 }

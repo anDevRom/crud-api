@@ -1,90 +1,14 @@
-import { createServer } from 'http';
-import { validate as validateId } from 'uuid';
-import { 
-  getRequestBody, 
-  urlUsersApi, 
-  getOkResponseCustomization, 
-  getErrorResponseCustomization 
-} from './helpers';
-import { Controller } from './controller';
-import { 
-  DbError, 
-  FieldRequiredError, 
-  INVALID_ID_MESSAGE, 
-  SERVER_SIDE_ERROR_MESSAGE 
-} from './custom-errors';
-import { UserDTO } from './types';
+import * as _cluster from 'cluster';
+import { cpus } from 'os';
+const cluster = _cluster as unknown as _cluster.Cluster;
 
-const userController = new Controller<UserDTO>('users');
-
-const server = createServer(async (req, res) => {
-  const setOkResponseParams = getOkResponseCustomization(res);
-  const setErrorResponseParams = getErrorResponseCustomization(res);
-  
-  try {
-    if (req.url === urlUsersApi) {
-      if (req.method === 'GET') {
-        const users = await userController.getAll();
-  
-        setOkResponseParams(200, users);
-        return;
-      }
-  
-      if (req.method === 'POST') {
-        const body = await getRequestBody(req);
-        const user = await userController.create(body);
-  
-        setOkResponseParams(201, user);
-        return;
-      }
-    }
-  
-    if (req.url.startsWith(`${urlUsersApi}/`)) {
-      const userId = req.url.replace(`${urlUsersApi}/`, '');
-      
-      if (!validateId(userId)) {
-        setErrorResponseParams(400, INVALID_ID_MESSAGE);
-        return;
-      }
-  
-      if (req.method === 'GET') {
-        const user = await userController.getOne(userId);
-  
-        setOkResponseParams(200, user);
-        return;
-      }
-  
-      if (req.method === 'PUT') {
-        const body = await getRequestBody(req);
-        const user = await userController.update(userId, body);
-        
-        setOkResponseParams(200, user);
-        return;
-      }
-  
-      if (req.method === 'DELETE') {
-        await userController.delete(userId);
-  
-        res.statusCode = 204;
-        res.end();
-        return;
-      }
-    }
-  } catch(err) {
-    if (err instanceof DbError) {
-      setErrorResponseParams(404, err.message);
-      return;
-    }
-
-    if (err instanceof FieldRequiredError) {
-      setErrorResponseParams(400, err.message);
-      return;
-    }
-
-    setErrorResponseParams(500, SERVER_SIDE_ERROR_MESSAGE);
+if (cluster.isPrimary) {
+  const cpusCount = cpus().length;
+  for (let i = 0; i < cpusCount; i++) {
+    cluster.fork();
   }
-});
+}
 
-server.listen(8080, () => {
-  console.log('Server started on port 8080');
-});
+if (cluster.isWorker) {
+  import('./server');
+}

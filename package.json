@@ -4,7 +4,8 @@
   "description": "Simple CRUD API",
   "main": "index.ts",
   "scripts": {
-    "start:dev": "nodemon --esm src/index.ts",
+    "start:dev": "nodemon --esm src/server.ts",
+    "start:multi": "nodemon --esm src/index.ts",
     "start:prod": "cross-env NODE_ENV=production && webpack --env production && node dist/bundle.js"
   },
   "repository": {
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "cross-env": "^7.0.3",
+    "dotenv": "^16.0.1",
     "uuid": "^8.3.2"
   }
 }
