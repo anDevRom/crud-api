@@ -10,6 +10,7 @@ import { Controller } from './controller';
 import { 
   DbError, 
   FieldRequiredError, 
+  INVALID_ENDPOINT_MESSAGE, 
   INVALID_ID_MESSAGE, 
   SERVER_SIDE_ERROR_MESSAGE 
 } from './custom-errors';
@@ -18,7 +19,7 @@ import 'dotenv/config';
 
 const userController = new Controller<UserDTO>('users');
 
-const server = createServer(async (req, res) => {
+export const server = createServer(async (req, res) => {
   const setOkResponseParams = getOkResponseCustomization(res);
   const setErrorResponseParams = getErrorResponseCustomization(res);
   
@@ -71,6 +72,8 @@ const server = createServer(async (req, res) => {
         return;
       }
     }
+
+    setErrorResponseParams(404, INVALID_ENDPOINT_MESSAGE);
   } catch(err) {
     if (err instanceof DbError) {
       setErrorResponseParams(404, err.message);
@@ -82,6 +85,7 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    console.error(err);
     setErrorResponseParams(500, SERVER_SIDE_ERROR_MESSAGE);
   }
 });
@@ -92,4 +96,8 @@ server.on('request', (req) => {
 
 server.listen(process.env.PORT, () => {
   console.log(`Server started. Port: ${process.env.PORT}. Pid: ${process.pid}`);
+});
+
+process.on('SIGINT', () => {
+  process.exit();
 });

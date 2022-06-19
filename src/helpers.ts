@@ -2,6 +2,8 @@ import {IncomingMessage, ServerResponse} from 'http';
 
 export const urlUsersApi = '/api/users';
 
+export const emulateQueryToDb = () => new Promise(res => setTimeout(res, 300));
+
 export const getOkResponseCustomization = (res: ServerResponse) => {
   return <T>(statusCode: number, data: T) => {
     res.statusCode = statusCode;
